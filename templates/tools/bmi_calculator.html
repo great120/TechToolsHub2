@@ -1,0 +1,161 @@
+<!-- templates/tools/bmi_calculator.html -->
+{% extends "base.html" %}
+
+{% block title %}BMI Calculator - Tech ToolsHub{% endblock %}
+
+{% block content %}
+<div class="tool-header">
+    <h1>BMI Calculator</h1>
+    <p>Calculate your Body Mass Index (BMI) and check if you're in a healthy weight range.</p>
+</div>
+
+<div class="tool-container">
+    <div class="form-group">
+        <label>Unit System:</label>
+        <div class="radio-group">
+            <input type="radio" id="metric" name="unit" value="metric" checked>
+            <label for="metric">Metric (kg, cm)</label>
+            
+            <input type="radio" id="imperial" name="unit" value="imperial">
+            <label for="imperial">Imperial (lbs, in)</label>
+        </div>
+    </div>
+    
+    <div id="metric-inputs">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="weight-kg">Weight (kg):</label>
+                <input type="number" id="weight-kg" class="form-control" placeholder="e.g., 70" min="20" max="300" step="0.1" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="height-cm">Height (cm):</label>
+                <input type="number" id="height-cm" class="form-control" placeholder="e.g., 170" min="50" max="250" required>
+            </div>
+        </div>
+    </div>
+    
+    <div id="imperial-inputs" style="display: none;">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="weight-lb">Weight (lbs):</label>
+                <input type="number" id="weight-lb" class="form-control" placeholder="e.g., 154" min="44" max="660" step="0.1" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="height-in">Height (inches):</label>
+                <input type="number" id="height-in" class="form-control" placeholder="e.g., 67" min="20" max="100" step="0.1" required>
+            </div>
+        </div>
+    </div>
+    
+    <button id="calculate-bmi" class="btn btn-full">Calculate BMI</button>
+    
+    <div id="bmi-result" class="result-container" style="display: none;">
+        <h3>Your BMI Results:</h3>
+        <div id="bmi-value"></div>
+        <div id="bmi-category"></div>
+        <div id="bmi-interpretation"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const metricRadio = document.getElementById('metric');
+        const imperialRadio = document.getElementById('imperial');
+        const metricInputs = document.getElementById('metric-inputs');
+        const imperialInputs = document.getElementById('imperial-inputs');
+        const calculateBtn = document.getElementById('calculate-bmi');
+        const resultContainer = document.getElementById('bmi-result');
+        const bmiValueDiv = document.getElementById('bmi-value');
+        const bmiCategoryDiv = document.getElementById('bmi-category');
+        const bmiInterpretationDiv = document.getElementById('bmi-interpretation');
+        
+        // Set default values
+        document.getElementById('weight-kg').value = 70;
+        document.getElementById('height-cm').value = 170;
+        document.getElementById('weight-lb').value = 154;
+        document.getElementById('height-in').value = 67;
+        
+        // Toggle input sections based on unit selection
+        metricRadio.addEventListener('change', function() {
+            if (this.checked) {
+                metricInputs.style.display = 'block';
+                imperialInputs.style.display = 'none';
+            }
+        });
+        
+        imperialRadio.addEventListener('change', function() {
+            if (this.checked) {
+                metricInputs.style.display = 'none';
+                imperialInputs.style.display = 'block';
+            }
+        });
+        
+        calculateBtn.addEventListener('click', function() {
+            const isMetric = metricRadio.checked;
+            let weight, height;
+            
+            if (isMetric) {
+                weight = parseFloat(document.getElementById('weight-kg').value);
+                height = parseFloat(document.getElementById('height-cm').value);
+                
+                if (!weight || !height) {
+                    alert('Please enter both weight and height');
+                    return;
+                }
+            } else {
+                weight = parseFloat(document.getElementById('weight-lb').value);
+                height = parseFloat(document.getElementById('height-in').value);
+                
+                if (!weight || !height) {
+                    alert('Please enter both weight and height');
+                    return;
+                }
+            }
+            
+            fetch('/api/calculate-bmi', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    weight: weight,
+                    height: height,
+                    unit: isMetric ? 'metric' : 'imperial'
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    bmiValueDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                } else {
+                    bmiValueDiv.innerHTML = `<p class="bmi-number">Your BMI: <strong>${data.bmi}</strong></p>`;
+                    bmiValueDiv.innerHTML = `<p class="bmi-number">Your BMI: <strong>${data.bmi}</strong></p>`;
+                    bmiCategoryDiv.innerHTML = `<p>Category: <strong>${data.category}</strong></p>`;
+                    
+                    // Add interpretation based on category
+                    let interpretation = '';
+                    if (data.category === 'Underweight') {
+                        interpretation = 'You are underweight. Consider consulting with a healthcare provider about healthy ways to gain weight.';
+                    } else if (data.category === 'Normal weight') {
+                        interpretation = 'You are at a healthy weight. Maintain a balanced diet and regular physical activity.';
+                    } else if (data.category === 'Overweight') {
+                        interpretation = 'You are overweight. Consider healthy lifestyle changes like increased physical activity and a balanced diet.';
+                    } else if (data.category === 'Obese') {
+                        interpretation = 'You are in the obese category. It\'s recommended to consult with a healthcare provider for personalized advice.';
+                    }
+                    
+                    bmiInterpretationDiv.innerHTML = `<p>${interpretation}</p>`;
+                }
+                resultContainer.style.display = 'block';
+            });
+        });
+        
+        // Calculate on load to show initial BMI
+        calculateBtn.click();
+    });
+</script>
+{% endblock %}

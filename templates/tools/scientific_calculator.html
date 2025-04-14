@@ -1,0 +1,131 @@
+<!-- templates/tools/scientific_calculator.html -->
+{% extends "base.html" %}
+
+{% block title %}Scientific Calculator - Tech ToolsHub{% endblock %}
+
+{% block content %}
+<div class="tool-header">
+    <h1>Scientific Calculator</h1>
+    <p>Perform complex mathematical calculations including trigonometry, logarithms, powers, and more.</p>
+</div>
+
+<div class="tool-container">
+    <div class="calculator">
+        <input type="text" class="calculator-screen form-control" id="display" disabled>
+        
+        <div class="calculator-keys">
+            <button type="button" class="calculator-key clear" value="clear">C</button>
+            <button type="button" class="calculator-key clear" value="backspace">⌫</button>
+            
+            <button type="button" class="calculator-key function" value="sin">sin</button>
+            <button type="button" class="calculator-key function" value="cos">cos</button>
+            <button type="button" class="calculator-key function" value="tan">tan</button>
+            <button type="button" class="calculator-key operator" value="/">/</button>
+            
+            <button type="button" class="calculator-key function" value="log">log</button>
+            <button type="button" class="calculator-key" value="7">7</button>
+            <button type="button" class="calculator-key" value="8">8</button>
+            <button type="button" class="calculator-key" value="9">9</button>
+            
+            <button type="button" class="calculator-key function" value="ln">ln</button>
+            <button type="button" class="calculator-key" value="4">4</button>
+            <button type="button" class="calculator-key" value="5">5</button>
+            <button type="button" class="calculator-key" value="6">6</button>
+            
+            <button type="button" class="calculator-key function" value="sqrt">√</button>
+            <button type="button" class="calculator-key" value="1">1</button>
+            <button type="button" class="calculator-key" value="2">2</button>
+            <button type="button" class="calculator-key" value="3">3</button>
+            
+            <button type="button" class="calculator-key function" value="^">^</button>
+            <button type="button" class="calculator-key" value="0">0</button>
+            <button type="button" class="calculator-key" value=".">.</button>
+            <button type="button" class="calculator-key operator" value="+">+</button>
+            
+            <button type="button" class="calculator-key function" value="(">(</button>
+            <button type="button" class="calculator-key function" value=")">)</button>
+            <button type="button" class="calculator-key operator" value="-">-</button>
+            <button type="button" class="calculator-key operator" value="*">×</button>
+            
+            <button type="button" class="calculator-key function" value="π">π</button>
+            <button type="button" class="calculator-key function" value="e">e</button>
+            <button type="button" class="calculator-key function" value="%">%</button>
+            <button type="button" class="calculator-key equals" value="=">=</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const display = document.getElementById('display');
+        const keys = document.querySelector('.calculator-keys');
+        let currentExpression = '';
+        
+        keys.addEventListener('click', function(e) {
+            if (!e.target.matches('button')) return;
+            
+            const key = e.target;
+            const action = key.value;
+            
+            if (action === 'clear') {
+                currentExpression = '';
+                display.value = '0';
+                return;
+            }
+            
+            if (action === 'backspace') {
+                currentExpression = currentExpression.slice(0, -1);
+                display.value = currentExpression || '0';
+                return;
+            }
+            
+            if (action === '=') {
+                try {
+                    // Send expression to backend for calculation
+                    fetch('/api/calculate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ expression: currentExpression }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            display.value = 'Error';
+                            setTimeout(() => {
+                                display.value = currentExpression;
+                            }, 1000);
+                        } else {
+                            display.value = data.result;
+                            currentExpression = String(data.result);
+                        }
+                    });
+                } catch (error) {
+                    display.value = 'Error';
+                    setTimeout(() => {
+                        display.value = currentExpression;
+                    }, 1000);
+                }
+                return;
+            }
+            
+            // Handle special function inputs
+            if (action === 'sin' || action === 'cos' || action === 'tan' || 
+                action === 'log' || action === 'ln' || action === 'sqrt') {
+                currentExpression += action + '(';
+            } else if (action === 'π') {
+                currentExpression += 'π';
+            } else if (action === 'e') {
+                currentExpression += 'e';
+            } else {
+                currentExpression += action;
+            }
+            
+            display.value = currentExpression;
+        });
+    });
+</script>
+{% endblock %}

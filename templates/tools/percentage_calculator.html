@@ -1,0 +1,182 @@
+<!-- templates/tools/percentage_calculator.html -->
+{% extends "base.html" %}
+
+{% block title %}Percentage Calculator - Tech ToolsHub{% endblock %}
+
+{% block content %}
+<div class="tool-header">
+    <h1>Percentage Calculator</h1>
+    <p>Calculate percentages, percentage changes, and percentage scores with this easy-to-use tool.</p>
+</div>
+
+<div class="tool-container">
+    <div class="form-group">
+        <label>Calculation Type:</label>
+        <select id="calculation-type" class="form-control">
+            <option value="percentage_of">What is X% of Y?</option>
+            <option value="percentage_change">Percentage change from X to Y</option>
+            <option value="percentage_score">X out of Y as a percentage</option>
+        </select>
+    </div>
+    
+    <!-- What is X% of Y? -->
+    <div id="percentage-of-form">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="percentage">Percentage (%):</label>
+                <input type="number" id="percentage" class="form-control" placeholder="e.g., 20" step="0.01" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="value">Value:</label>
+                <input type="number" id="value" class="form-control" placeholder="e.g., 500" step="0.01" required>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Percentage change from X to Y -->
+    <div id="percentage-change-form" style="display: none;">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="original">Original Value:</label>
+                <input type="number" id="original" class="form-control" placeholder="e.g., 100" step="0.01" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="new-value">New Value:</label>
+                <input type="number" id="new-value" class="form-control" placeholder="e.g., 120" step="0.01" required>
+            </div>
+        </div>
+    </div>
+    
+    <!-- X out of Y as a percentage -->
+    <div id="percentage-score-form" style="display: none;">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="correct">Number Correct:</label>
+                <input type="number" id="correct" class="form-control" placeholder="e.g., 8" step="0.01" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="total">Total Questions:</label>
+                <input type="number" id="total" class="form-control" placeholder="e.g., 10" step="0.01" required>
+            </div>
+        </div>
+    </div>
+    
+    <button id="calculate-percentage" class="btn btn-full">Calculate</button>
+    
+    <div id="percentage-result" class="result-container" style="display: none;">
+        <h3>Result:</h3>
+        <div id="percentage-result-value"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const calculationType = document.getElementById('calculation-type');
+        const percentageOfForm = document.getElementById('percentage-of-form');
+        const percentageChangeForm = document.getElementById('percentage-change-form');
+        const percentageScoreForm = document.getElementById('percentage-score-form');
+        const calculateBtn = document.getElementById('calculate-percentage');
+        const resultContainer = document.getElementById('percentage-result');
+        const resultDiv = document.getElementById('percentage-result-value');
+        
+        // Set default values
+        document.getElementById('percentage').value = 20;
+        document.getElementById('value').value = 500;
+        document.getElementById('original').value = 100;
+        document.getElementById('new-value').value = 120;
+        document.getElementById('correct').value = 8;
+        document.getElementById('total').value = 10;
+        
+        // Toggle form sections based on calculation type
+        calculationType.addEventListener('change', function() {
+            percentageOfForm.style.display = 'none';
+            percentageChangeForm.style.display = 'none';
+            percentageScoreForm.style.display = 'none';
+            
+            if (this.value === 'percentage_of') {
+                percentageOfForm.style.display = 'block';
+            } else if (this.value === 'percentage_change') {
+                percentageChangeForm.style.display = 'block';
+            } else if (this.value === 'percentage_score') {
+                percentageScoreForm.style.display = 'block';
+            }
+        });
+        
+        calculateBtn.addEventListener('click', function() {
+            const type = calculationType.value;
+            let data = { type };
+            
+            if (type === 'percentage_of') {
+                data.percentage = parseFloat(document.getElementById('percentage').value);
+                data.value = parseFloat(document.getElementById('value').value);
+                
+                if (isNaN(data.percentage) || isNaN(data.value)) {
+                    alert('Please enter valid numbers');
+                    return;
+                }
+            } else if (type === 'percentage_change') {
+                data.original = parseFloat(document.getElementById('original').value);
+                data.new_value = parseFloat(document.getElementById('new-value').value);
+                
+                if (isNaN(data.original) || isNaN(data.new_value)) {
+                    alert('Please enter valid numbers');
+                    return;
+                }
+                
+                if (data.original === 0) {
+                    alert('Original value cannot be zero for percentage change calculation');
+                    return;
+                }
+            } else if (type === 'percentage_score') {
+                data.correct = parseFloat(document.getElementById('correct').value);
+                data.total = parseFloat(document.getElementById('total').value);
+                
+                if (isNaN(data.correct) || isNaN(data.total)) {
+                    alert('Please enter valid numbers');
+                    return;
+                }
+                
+                if (data.total === 0) {
+                    alert('Total cannot be zero');
+                    return;
+                }
+            }
+            
+            fetch('/api/calculate-percentage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                } else {
+                    if (type === 'percentage_of') {
+                        resultDiv.innerHTML = `<p>${document.getElementById('percentage').value}% of ${document.getElementById('value').value} is <strong>${data.result.toFixed(2)}</strong></p>`;
+                    } else if (type === 'percentage_change') {
+                        const changeDirection = data.percentage_change >= 0 ? 'increase' : 'decrease';
+                        resultDiv.innerHTML = `
+                            <p>The change from ${document.getElementById('original').value} to ${document.getElementById('new-value').value} is <strong>${data.change.toFixed(2)}</strong></p>
+                            <p>This is a <strong>${Math.abs(data.percentage_change).toFixed(2)}%</strong> ${changeDirection}</p>
+                        `;
+                    } else if (type === 'percentage_score') {
+                        resultDiv.innerHTML = `<p>${document.getElementById('correct').value} out of ${document.getElementById('total').value} is <strong>${data.percentage.toFixed(2)}%</strong></p>`;
+                    }
+                }
+                resultContainer.style.display = 'block';
+            });
+        });
+        
+        // Calculate on load to show initial result
+        calculateBtn.click();
+    });
+</script>
+{% endblock %}

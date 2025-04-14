@@ -1,0 +1,206 @@
+<!-- templates/tools/unit_converter.html -->
+{% extends "base.html" %}
+
+{% block title %}Unit Converter - Tech ToolsHub{% endblock %}
+
+{% block content %}
+<div class="tool-header">
+    <h1>Unit Converter</h1>
+    <p>Convert between different units of length, weight, temperature, area, and volume.</p>
+</div>
+
+<div class="tool-container">
+    <div class="form-group">
+        <label for="category">Category:</label>
+        <select id="category" class="form-control">
+            <option value="length">Length</option>
+            <option value="weight">Weight</option>
+            <option value="temperature">Temperature</option>
+            <option value="area">Area</option>
+            <option value="volume">Volume</option>
+        </select>
+    </div>
+    
+    <div class="form-row">
+        <div class="form-group">
+            <label for="from-unit">From:</label>
+            <select id="from-unit" class="form-control"></select>
+        </div>
+        
+        <div class="form-group">
+            <label for="to-unit">To:</label>
+            <select id="to-unit" class="form-control"></select>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label for="convert-value">Value:</label>
+        <input type="number" id="convert-value" class="form-control" value="1" step="0.001" required>
+    </div>
+    
+    <button id="convert-unit" class="btn btn-full">Convert</button>
+    
+    <div id="conversion-result" class="result-container" style="display: none;">
+        <h3>Result:</h3>
+        <div id="conversion-result-value"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const categorySelect = document.getElementById('category');
+        const fromUnitSelect = document.getElementById('from-unit');
+        const toUnitSelect = document.getElementById('to-unit');
+        const valueInput = document.getElementById('convert-value');
+        const convertBtn = document.getElementById('convert-unit');
+        const resultContainer = document.getElementById('conversion-result');
+        const resultDiv = document.getElementById('conversion-result-value');
+        
+        // Units for each category
+        const units = {
+            length: [
+                { value: 'mm', label: 'Millimeters (mm)' },
+                { value: 'cm', label: 'Centimeters (cm)' },
+                { value: 'm', label: 'Meters (m)' },
+                { value: 'km', label: 'Kilometers (km)' },
+                { value: 'inch', label: 'Inches (in)' },
+                { value: 'foot', label: 'Feet (ft)' },
+                { value: 'yard', label: 'Yards (yd)' },
+                { value: 'mile', label: 'Miles (mi)' }
+            ],
+            weight: [
+                { value: 'mg', label: 'Milligrams (mg)' },
+                { value: 'g', label: 'Grams (g)' },
+                { value: 'kg', label: 'Kilograms (kg)' },
+                { value: 'oz', label: 'Ounces (oz)' },
+                { value: 'lb', label: 'Pounds (lb)' },
+                { value: 'stone', label: 'Stone (st)' },
+                { value: 'ton', label: 'Tons (US ton)' }
+            ],
+            temperature: [
+                { value: 'celsius', label: 'Celsius (°C)' },
+                { value: 'fahrenheit', label: 'Fahrenheit (°F)' },
+                { value: 'kelvin', label: 'Kelvin (K)' }
+            ],
+            area: [
+                { value: 'sq_m', label: 'Square Meters (m²)' },
+                { value: 'sq_km', label: 'Square Kilometers (km²)' },
+                { value: 'sq_ft', label: 'Square Feet (ft²)' },
+                { value: 'sq_yd', label: 'Square Yards (yd²)' },
+                { value: 'acre', label: 'Acres' },
+                { value: 'hectare', label: 'Hectares (ha)' }
+            ],
+            volume: [
+                { value: 'ml', label: 'Milliliters (ml)' },
+                { value: 'l', label: 'Liters (l)' },
+                { value: 'cu_m', label: 'Cubic Meters (m³)' },
+                { value: 'cu_ft', label: 'Cubic Feet (ft³)' },
+                { value: 'fl_oz', label: 'Fluid Ounces (fl oz)' },
+                { value: 'pint', label: 'Pints (pt)' },
+                { value: 'gallon', label: 'Gallons (gal)' }
+            ]
+        };
+        
+        // Populate unit dropdowns based on selected category
+        function populateUnitDropdowns(category) {
+            // Clear current options
+            fromUnitSelect.innerHTML = '';
+            toUnitSelect.innerHTML = '';
+            
+            // Add new options based on category
+            units[category].forEach(unit => {
+                const fromOption = document.createElement('option');
+                fromOption.value = unit.value;
+                fromOption.textContent = unit.label;
+                fromUnitSelect.appendChild(fromOption);
+                
+                const toOption = document.createElement('option');
+                toOption.value = unit.value;
+                toOption.textContent = unit.label;
+                toUnitSelect.appendChild(toOption);
+            });
+            
+            // Set default selections
+            if (category === 'length') {
+                fromUnitSelect.value = 'm';
+                toUnitSelect.value = 'km';
+            } else if (category === 'weight') {
+                fromUnitSelect.value = 'kg';
+                toUnitSelect.value = 'lb';
+            } else if (category === 'temperature') {
+                fromUnitSelect.value = 'celsius';
+                toUnitSelect.value = 'fahrenheit';
+            } else if (category === 'area') {
+                fromUnitSelect.value = 'sq_m';
+                toUnitSelect.value = 'sq_ft';
+            } else if (category === 'volume') {
+                fromUnitSelect.value = 'l';
+                toUnitSelect.value = 'gallon';
+            }
+        }
+        
+        // Initialize with length units
+        populateUnitDropdowns('length');
+        
+        // Update units when category changes
+        categorySelect.addEventListener('change', function() {
+            populateUnitDropdowns(this.value);
+            performConversion();
+        });
+        
+        // Function to perform conversion
+        function performConversion() {
+            const category = categorySelect.value;
+            const fromUnit = fromUnitSelect.value;
+            const toUnit = toUnitSelect.value;
+            const value = parseFloat(valueInput.value);
+            
+            if (isNaN(value)) {
+                alert('Please enter a valid number');
+                return;
+            }
+            
+            fetch('/api/convert-unit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    category: category,
+                    from_unit: fromUnit,
+                    to_unit: toUnit,
+                    value: value
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                } else {
+                    // Get the unit labels for display
+                    const fromUnitLabel = fromUnitSelect.options[fromUnitSelect.selectedIndex].text;
+                    const toUnitLabel = toUnitSelect.options[toUnitSelect.selectedIndex].text;
+                    
+                    resultDiv.innerHTML = `
+                        <p>${value} ${fromUnitLabel} = <strong>${data.result.toFixed(6)}</strong> ${toUnitLabel}</p>
+                    `;
+                }
+                resultContainer.style.display = 'block';
+            });
+        }
+        
+        // Convert when button is clicked
+        convertBtn.addEventListener('click', performConversion);
+        
+        // Convert when inputs change
+        fromUnitSelect.addEventListener('change', performConversion);
+        toUnitSelect.addEventListener('change', performConversion);
+        valueInput.addEventListener('input', performConversion);
+        
+        // Initial conversion
+        performConversion();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,29 @@
+<!-- templates/tools/qr_generator.html -->
+{% extends "base.html" %}
+
+{% block title %}QR Code Generator - Tech ToolsHub{% endblock %}
+
+{% block content %}
+<div class="tool-header">
+    <h1>QR Code Generator</h1>
+    <p>Create QR codes for URLs, text, contact information, and more. Just enter your content below and generate a QR code instantly.</p>
+</div>
+
+<div class="tool-container">
+    <form method="POST" action="{{ url_for('qr_generator') }}">
+        <div class="form-group">
+            <label for="data">Content for QR Code:</label>
+            <input type="text" id="data" name="data" class="form-control" placeholder="Enter URL, text, or information" required>
+        </div>
+        
+        <button type="submit" class="btn btn-full">Generate QR Code</button>
+    </form>
+    
+    {% if qr_image %}
+    <div class="qr-result">
+        <img src="data:image/png;base64,{{ qr_image }}" alt="Generated QR Code">
+        <p>Right-click on the image and select "Save image as..." to download your QR code.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

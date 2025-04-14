@@ -1,0 +1,78 @@
+<!-- templates/tools/age_calculator.html -->
+{% extends "base.html" %}
+
+{% block title %}Age Calculator - Tech ToolsHub{% endblock %}
+
+{% block content %}
+<div class="tool-header">
+    <h1>Age Calculator</h1>
+    <p>Calculate your exact age in years, months, weeks, and days based on your date of birth.</p>
+</div>
+
+<div class="tool-container">
+    <div class="form-group">
+        <label for="dob">Date of Birth:</label>
+        <input type="date" id="dob" class="form-control" required>
+    </div>
+    
+    <button id="calculate-age" class="btn btn-full">Calculate Age</button>
+    
+    <div id="age-result" class="result-container" style="display: none;">
+        <h3>Your Age:</h3>
+        <div id="age-results"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dobInput = document.getElementById('dob');
+        const calculateBtn = document.getElementById('calculate-age');
+        const resultContainer = document.getElementById('age-result');
+        const resultDiv = document.getElementById('age-results');
+        
+        // Set default date (30 years ago)
+        const defaultDate = new Date();
+        defaultDate.setFullYear(defaultDate.getFullYear() - 30);
+        dobInput.valueAsDate = defaultDate;
+        
+        calculateBtn.addEventListener('click', function() {
+            const dob = dobInput.value;
+            
+            if (!dob) {
+                alert('Please enter your date of birth');
+                return;
+            }
+            
+            fetch('/api/calculate-age', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ dob: dob }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                } else {
+                    let resultHTML = `
+                        <p><strong>${data.years}</strong> years</p>
+                        <p><strong>${data.months}</strong> months</p>
+                        <p><strong>${data.weeks}</strong> weeks</p>
+                        <p><strong>${data.days}</strong> days</p>
+                        <hr>
+                        <p>Your next birthday is in <strong>${data.next_birthday_in_days}</strong> days</p>
+                    `;
+                    resultDiv.innerHTML = resultHTML;
+                }
+                resultContainer.style.display = 'block';
+            });
+        });
+        
+        // Calculate on load to show initial age
+        calculateBtn.click();
+    });
+</script>
+{% endblock %}

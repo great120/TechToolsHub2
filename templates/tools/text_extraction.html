@@ -1,0 +1,60 @@
+<!-- templates/tools/text_extraction.html -->
+{% extends "base.html" %}
+
+{% block title %}Text Extraction - Tech ToolsHub{% endblock %}
+
+{% block content %}
+<div class="tool-header">
+    <h1>Text Extraction</h1>
+    <p>Extract text from images and PDF files using OCR technology. Upload your file and let our tool do the rest.</p>
+</div>
+
+<div class="tool-container">
+    <form method="POST" action="{{ url_for('text_extraction') }}" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="file">Upload Image or PDF:</label>
+            <input type="file" id="file" name="file" class="form-control" accept=".jpg, .jpeg, .png, .pdf" required>
+            <small>Supported formats: JPG, JPEG, PNG, PDF</small>
+        </div>
+        
+        <button type="submit" class="btn btn-full">Extract Text</button>
+    </form>
+    
+    {% if extracted_text %}
+    <div class="result-container">
+        <h3>Extracted Text:</h3>
+        <div class="extracted-text">{{ extracted_text }}</div>
+        <button id="copy-text" class="btn" style="margin-top: 15px;">Copy Text</button>
+    </div>
+    {% endif %}
+    
+    {% if error %}
+    <div class="alert alert-error">
+        {{ error }}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyButton = document.getElementById('copy-text');
+        if (copyButton) {
+            copyButton.addEventListener('click', function() {
+                const textArea = document.createElement('textarea');
+                textArea.value = document.querySelector('.extracted-text').textContent;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                copyButton.textContent = 'Copied!';
+                setTimeout(function() {
+                    copyButton.textContent = 'Copy Text';
+                }, 2000);
+            });
+        }
+    });
+</script>
+{% endblock %}

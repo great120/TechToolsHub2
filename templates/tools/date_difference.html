@@ -1,0 +1,91 @@
+<!-- templates/tools/date_difference.html -->
+{% extends "base.html" %}
+
+{% block title %}Date Difference Calculator - Tech ToolsHub{% endblock %}
+
+{% block content %}
+<div class="tool-header">
+    <h1>Date Difference Calculator</h1>
+    <p>Calculate the exact time between two dates in days, weeks, months, and years.</p>
+</div>
+
+<div class="tool-container">
+    <div class="form-group">
+        <label for="start-date">Start Date:</label>
+        <input type="date" id="start-date" class="form-control" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="end-date">End Date:</label>
+        <input type="date" id="end-date" class="form-control" required>
+    </div>
+    
+    <button id="calculate-date" class="btn btn-full">Calculate Difference</button>
+    
+    <div id="date-result" class="result-container" style="display: none;">
+        <h3>Results:</h3>
+        <div id="date-difference-results"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+        const calculateBtn = document.getElementById('calculate-date');
+        const resultContainer = document.getElementById('date-result');
+        const resultDiv = document.getElementById('date-difference-results');
+        
+        // Set default dates (today and tomorrow)
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        startDateInput.valueAsDate = today;
+        endDateInput.valueAsDate = tomorrow;
+        
+        calculateBtn.addEventListener('click', function() {
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+            
+            if (!startDate || !endDate) {
+                alert('Please select both dates');
+                return;
+            }
+            
+            fetch('/api/date-difference', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    start_date: startDate,
+                    end_date: endDate
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                } else {
+                    let resultHTML = `
+                        <p><strong>Total Days:</strong> ${data.days} days</p>
+                        <p><strong>Total Weeks:</strong> ${data.weeks} weeks</p>
+                        <p><strong>Total Months:</strong> ${data.months} months</p>
+                        <p><strong>Total Years:</strong> ${data.years} years</p>
+                        <hr>
+                        <p><strong>Detailed:</strong> ${data.detailed.years} years, ${data.detailed.months} months, ${data.detailed.weeks} weeks, and ${data.detailed.days} days</p>
+                    `;
+                    resultDiv.innerHTML = resultHTML;
+                }
+                resultContainer.style.display = 'block';
+            });
+        });
+        
+        // Calculate on load to show initial difference
+        calculateBtn.click();
+    });
+</script>
+{% endblock %}
