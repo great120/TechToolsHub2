@@ -1,0 +1,103 @@
+<!-- templates/tools.html -->
+{% extends "base.html" %}
+
+{% block title %}Tech ToolsHub - All Tools{% endblock %}
+
+{% block content %}
+<section class="tools-header">
+    <h1>All Tools</h1>
+    <p>Explore our collection of free online tools designed to make your life easier</p>
+</section>
+
+<section class="tools-list">
+    <div class="cards-grid">
+        <div class="card">
+            <div class="card-icon">
+                <i class="fas fa-qrcode"></i>
+            </div>
+            <div class="card-content">
+                <h3>QR Code Generator</h3>
+                <p>Create QR codes for links, text, contact information, and more.</p>
+                <a href="{{ url_for('qr_generator') }}" class="btn btn-full">Use Tool</a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="card-content">
+                <h3>Text Extraction</h3>
+                <p>Extract text from images and PDF files with our OCR technology.</p>
+                <a href="{{ url_for('text_extraction') }}" class="btn btn-full">Use Tool</a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-icon">
+                <i class="fas fa-calculator"></i>
+            </div>
+            <div class="card-content">
+                <h3>Scientific Calculator</h3>
+                <p>Perform complex mathematical calculations including trigonometry, logarithms and more.</p>
+                <a href="{{ url_for('scientific_calculator') }}" class="btn btn-full">Use Tool</a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-icon">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="card-content">
+                <h3>Date Difference Calculator</h3>
+                <p>Calculate the number of days, weeks, months, and years between two dates.</p>
+                <a href="{{ url_for('date_difference') }}" class="btn btn-full">Use Tool</a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-icon">
+                <i class="fas fa-weight"></i>
+            </div>
+            <div class="card-content">
+                <h3>BMI Calculator</h3>
+                <p>Calculate your Body Mass Index (BMI) and check if you're in a healthy weight range.</p>
+                <a href="{{ url_for('bmi_calculator') }}" class="btn btn-full">Use Tool</a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-icon">
+                <i class="fas fa-birthday-cake"></i>
+            </div>
+            <div class="card-content">
+                <h3>Age Calculator</h3>
+                <p>Calculate your exact age in years, months, weeks, and days based on your date of birth.</p>
+                <a href="{{ url_for('age_calculator') }}" class="btn btn-full">Use Tool</a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-icon">
+                <i class="fas fa-percent"></i>
+            </div>
+            <div class="card-content">
+                <h3>Percentage Calculator</h3>
+                <p>Calculate percentages, percentage changes, discounts, and more.</p>
+                <a href="{{ url_for('percentage_calculator') }}" class="btn btn-full">Use Tool</a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-icon">
+                <i class="fas fa-exchange-alt"></i>
+            </div>
+            <div class="card-content">
+                <h3>Unit Converter</h3>
+                <p>Convert between different units of length, weight, temperature, area, and volume.</p>
+                <a href="{{ url_for('unit_converter') }}" class="btn btn-full">Use Tool</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

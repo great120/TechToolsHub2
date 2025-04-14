@@ -1,0 +1,61 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tech ToolsHub - Free online tools for everyday tasks">
+    <meta name="keywords" content="online tools, calculator, converter, QR code, text extraction">
+    <meta name="author" content="Tech ToolsHub">
+    <meta property="og:title" content="Tech ToolsHub - Online Tools">
+    <meta property="og:description" content="Free online tools for everyday tasks including calculators, converters, and more.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://techtoolshub.com">
+    <meta property="og:image" content="/static/images/logo.png">
+    <title>{% block title %}Tech ToolsHub{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="dark-mode">
+    <header>
+        <div class="container">
+            <div class="logo">
+                <a href="{{ url_for('home') }}">Tech ToolsHub</a>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('home') }}">Home</a></li>
+                    <li><a href="{{ url_for('tools') }}">Tools</a></li>
+                    <li><a href="{{ url_for('about') }}">About Us</a></li>
+                    <li><a href="{{ url_for('privacy') }}">Privacy Policy</a></li>
+                </ul>
+            </nav>
+            <button id="theme-toggle">
+                <i class="fas fa-sun"></i>
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Tech ToolsHub. All rights reserved.</p>
+            <ul class="footer-links">
+                <li><a href="{{ url_for('tools') }}">Tools</a></li>
+                <li><a href="{{ url_for('about') }}">About Us</a></li>
+                <li><a href="{{ url_for('privacy') }}">Privacy Policy</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

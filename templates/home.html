@@ -1,0 +1,20 @@
+<!-- templates/home.html (continued) -->
+            <div class="card-icon">
+                <i class="fas fa-exchange-alt"></i>
+            </div>
+            <div class="card-content">
+                <h3>Unit Converter</h3>
+                <p>Easily convert between different units of length, weight, temperature and more.</p>
+                <a href="{{ url_for('unit_converter') }}" class="btn btn-full">Use Tool</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="about-home">
+    <h2>About Tech ToolsHub</h2>
+    <p>Tech ToolsHub is a collection of free online tools designed to help you with everyday tasks. Whether you need to calculate dates, generate QR codes, extract text from images, or perform complex calculations, we've got you covered.</p>
+    <p>Our tools are completely free to use, with no registration required. We're committed to providing useful utilities in a clean, ad-free environment.</p>
+    <a href="{{ url_for('about') }}" class="btn">Learn More</a>
+</section>
+{% endblock %}
